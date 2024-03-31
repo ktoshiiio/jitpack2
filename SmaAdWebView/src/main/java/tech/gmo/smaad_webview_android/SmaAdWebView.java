@@ -93,19 +93,34 @@ public class SmaAdWebView extends WebView {
     protected String mUploadableFileTypes = "*/*";
     protected final Map<String, String> mHttpHeaders = new HashMap<String, String>();
 
-    public SmaAdWebView(Context context) {
+    private String mediaId;
+    private String userParameter;
+
+//    public SmaAdWebView(Context context) {
+//        super(context);
+//        init(context);
+//    }
+
+//    public SmaAdWebView(Context context, AttributeSet attrs) {
+//        super(context, attrs);
+//        init(context);
+//    }
+
+//    public SmaAdWebView(Context context, AttributeSet attrs, int defStyleAttr) {
+//        super(context, attrs, defStyleAttr);
+//        init(context);
+//    }
+
+    public SmaAdWebView(Context context, String mediaId, String userParameter){
         super(context);
+        this.mediaId = mediaId;
+        this.userParameter = userParameter;
         init(context);
     }
 
-    public SmaAdWebView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(context);
-    }
-
-    public SmaAdWebView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(context);
+    public void ShowWebView(){
+        String url = String.format("https://offerwall.stg.smaad.net/wall/%s?u=%s", this.mediaId, this.userParameter);
+        super.loadUrl(url);
     }
 
     public void setListener(final Activity activity, final Listener listener) {
