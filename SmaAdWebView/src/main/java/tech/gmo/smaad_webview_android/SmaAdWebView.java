@@ -96,26 +96,24 @@ public class SmaAdWebView extends WebView {
     private String mediaId;
     private String userParameter;
 
-//    public SmaAdWebView(Context context) {
-//        super(context);
-//        init(context);
-//    }
-
-//    public SmaAdWebView(Context context, AttributeSet attrs) {
-//        super(context, attrs);
-//        init(context);
-//    }
-
-//    public SmaAdWebView(Context context, AttributeSet attrs, int defStyleAttr) {
-//        super(context, attrs, defStyleAttr);
-//        init(context);
-//    }
-
-    public SmaAdWebView(Context context, String mediaId, String userParameter){
+    public SmaAdWebView(Context context) {
         super(context);
+        init(context);
+    }
+
+    public SmaAdWebView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    public SmaAdWebView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context);
+    }
+
+    public void Initialize(String mediaId, String userParameter){
         this.mediaId = mediaId;
         this.userParameter = userParameter;
-        init(context);
     }
 
     public void ShowWebView(){
