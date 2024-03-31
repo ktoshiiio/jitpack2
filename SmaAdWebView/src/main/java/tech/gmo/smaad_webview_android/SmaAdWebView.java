@@ -48,6 +48,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.webkit.WebView;
+
+import androidx.annotation.Nullable;
+
 import java.util.MissingResourceException;
 import java.util.Locale;
 import java.util.LinkedList;
@@ -98,6 +101,8 @@ public class SmaAdWebView extends WebView {
 
     private String mediaId;
     private String userParameter;
+    @Nullable
+    public JavaScriptBridgeInterface javaScriptBridgeInterface;
 
     public SmaAdWebView(Context context) {
         super(context);
@@ -114,7 +119,19 @@ public class SmaAdWebView extends WebView {
         init(context);
     }
 
-    public void Initialize(String mediaId, String userParameter){
+    public void Initialize(final Activity activity, final Listener listener, String mediaId, String userParameter){
+        if (activity != null) {
+            mActivity = new WeakReference<Activity>(activity);
+        }
+        else {
+            mActivity = null;
+        }
+        setListener(activity, listener);
+
+        this.javaScriptBridgeInterface = new JavaScriptBridgeInterface(listener);
+//    addJavascriptInterface(javaScriptBridgeInterface, JavaScriptBridgeJS.JAVASCRIPT_BRIDGE_NAME);
+        addJavascriptInterface(this.javaScriptBridgeInterface, "Android");
+
         this.mediaId = mediaId;
         this.userParameter = userParameter;
     }
