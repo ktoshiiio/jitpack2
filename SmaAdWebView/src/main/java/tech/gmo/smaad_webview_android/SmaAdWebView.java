@@ -128,7 +128,7 @@ public class SmaAdWebView extends WebView {
         }
         setListener(activity, listener);
 
-        this.javaScriptBridgeInterface = new JavaScriptBridgeInterface(listener);
+        this.javaScriptBridgeInterface = new JavaScriptBridgeInterface(mActivity.get(), listener);
 //    addJavascriptInterface(javaScriptBridgeInterface, JavaScriptBridgeJS.JAVASCRIPT_BRIDGE_NAME);
         addJavascriptInterface(this.javaScriptBridgeInterface, "Android");
 
