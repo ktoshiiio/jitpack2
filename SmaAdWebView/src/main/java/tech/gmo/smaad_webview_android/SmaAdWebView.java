@@ -62,11 +62,14 @@ import java.util.Map;
 public class SmaAdWebView extends WebView {
 
     public interface Listener {
-        void onPageStarted(String url, Bitmap favicon);
-        void onPageFinished(String url);
-        void onPageError(int errorCode, String description, String failingUrl);
-        void onDownloadRequested(String url, String suggestedFilename, String mimeType, long contentLength, String contentDisposition, String userAgent);
-        void onExternalPageRequest(String url);
+        void onLoadStart(String url);
+        void onPermissionRequest(PermissionRequest request);
+        void shouldOverrideUrlLoading(String url);
+        void onLoadStop(String url);
+        void onReceivedError(int errorCode, String description, String failingUrl);
+        void onWebViewClosed();
+        void onUpdateVisitedHistory(WebView view, String url, boolean isReload);
+        void onConsoleMessage(String message, int lineNumber, String sourceID);
     }
 
     public static final String PACKAGE_NAME_DOWNLOAD_MANAGER = "com.android.providers.downloads";
@@ -483,7 +486,7 @@ public class SmaAdWebView extends WebView {
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 if (!hasError()) {
                     if (mListener != null) {
-                        mListener.onPageStarted(url, favicon);
+                        mListener.onLoadStart(url);
                     }
                 }
 
@@ -496,7 +499,7 @@ public class SmaAdWebView extends WebView {
             public void onPageFinished(WebView view, String url) {
                 if (!hasError()) {
                     if (mListener != null) {
-                        mListener.onPageFinished(url);
+                        mListener.onLoadStop(url);
                     }
                 }
 
@@ -510,7 +513,7 @@ public class SmaAdWebView extends WebView {
                 setLastError();
 
                 if (mListener != null) {
-                    mListener.onPageError(errorCode, description, failingUrl);
+                    mListener.onReceivedError(errorCode, description, failingUrl);
                 }
 
                 if (mCustomWebViewClient != null) {
@@ -524,7 +527,7 @@ public class SmaAdWebView extends WebView {
                     // if a listener is available
                     if (mListener != null) {
                         // inform the listener about the request
-                        mListener.onExternalPageRequest(url);
+                        mListener.shouldOverrideUrlLoading(url);
                     }
 
                     // cancel the original request
@@ -642,6 +645,9 @@ public class SmaAdWebView extends WebView {
 
             @Override
             public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
+                if (mListener != null) {
+                    mListener.onUpdateVisitedHistory(view, url, isReload);
+                }
                 if (mCustomWebViewClient != null) {
                     mCustomWebViewClient.doUpdateVisitedHistory(view, url, isReload);
                 }
@@ -947,6 +953,9 @@ public class SmaAdWebView extends WebView {
             @SuppressLint("NewApi")
             @SuppressWarnings("all")
             public void onPermissionRequest(PermissionRequest request) {
+                if (mListener != null) {
+                    mListener.onPermissionRequest(request);
+                }
                 if (Build.VERSION.SDK_INT >= 21) {
                     if (mCustomWebChromeClient != null) {
                         mCustomWebChromeClient.onPermissionRequest(request);
@@ -982,6 +991,9 @@ public class SmaAdWebView extends WebView {
 
             @Override
             public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+                if (mListener != null) {
+                    mListener.onConsoleMessage(message, lineNumber, sourceID);
+                }
                 if (mCustomWebChromeClient != null) {
                     mCustomWebChromeClient.onConsoleMessage(message, lineNumber, sourceID);
                 }
@@ -1058,51 +1070,48 @@ public class SmaAdWebView extends WebView {
             public void onDownloadStart(final String url, final String userAgent, final String contentDisposition, final String mimeType, final long contentLength) {
                 final String suggestedFilename = URLUtil.guessFileName(url, contentDisposition, mimeType);
 
-                if (mListener != null) {
-                    mListener.onDownloadRequested(url, suggestedFilename, mimeType, contentLength, contentDisposition, userAgent);
-                }
             }
 
         });
     }
 
-    @Override
-    public void loadUrl(final String url, Map<String, String> additionalHttpHeaders) {
-        if (additionalHttpHeaders == null) {
-            additionalHttpHeaders = mHttpHeaders;
-        }
-        else if (mHttpHeaders.size() > 0) {
-            additionalHttpHeaders.putAll(mHttpHeaders);
-        }
+//    @Override
+//    public void loadUrl(final String url, Map<String, String> additionalHttpHeaders) {
+//        if (additionalHttpHeaders == null) {
+//            additionalHttpHeaders = mHttpHeaders;
+//        }
+//        else if (mHttpHeaders.size() > 0) {
+//            additionalHttpHeaders.putAll(mHttpHeaders);
+//        }
+//
+//        super.loadUrl(url, additionalHttpHeaders);
+//    }
 
-        super.loadUrl(url, additionalHttpHeaders);
-    }
+//    @Override
+//    public void loadUrl(final String url) {
+//        if (mHttpHeaders.size() > 0) {
+//            super.loadUrl(url, mHttpHeaders);
+//        }
+//        else {
+//            super.loadUrl(url);
+//        }
+//    }
 
-    @Override
-    public void loadUrl(final String url) {
-        if (mHttpHeaders.size() > 0) {
-            super.loadUrl(url, mHttpHeaders);
-        }
-        else {
-            super.loadUrl(url);
-        }
-    }
+//    public void loadUrl(String url, final boolean preventCaching) {
+//        if (preventCaching) {
+//            url = makeUrlUnique(url);
+//        }
+//
+//        loadUrl(url);
+//    }
 
-    public void loadUrl(String url, final boolean preventCaching) {
-        if (preventCaching) {
-            url = makeUrlUnique(url);
-        }
-
-        loadUrl(url);
-    }
-
-    public void loadUrl(String url, final boolean preventCaching, final Map<String,String> additionalHttpHeaders) {
-        if (preventCaching) {
-            url = makeUrlUnique(url);
-        }
-
-        loadUrl(url, additionalHttpHeaders);
-    }
+//    public void loadUrl(String url, final boolean preventCaching, final Map<String,String> additionalHttpHeaders) {
+//        if (preventCaching) {
+//            url = makeUrlUnique(url);
+//        }
+//
+//        loadUrl(url, additionalHttpHeaders);
+//    }
 
     protected static String makeUrlUnique(final String url) {
         StringBuilder unique = new StringBuilder();
